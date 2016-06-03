@@ -1,0 +1,218 @@
+<html>
+<HEAD> 
+	<TITLE>Computer Ping 2</TITLE> 
+	<style type="text/css"> 
+		.hdr {
+			font-family:Verdana; 
+			font-size: 600px; 
+		  /*  color: #00FF00; */
+			color: #000000;
+			margin-right: 10px;
+		}
+		.header {
+			font-family:Verdana;
+			font-size: 48px;
+		  /*  color: #00FF00; */
+			color: #000000;
+		}
+		.header2 {
+			font-family:Verdana;
+			font-size: 12px;
+		  /*  color: #00FF00; */
+			color: #000000;
+		}
+		.header3 {
+			font-family:Verdana;
+			font-size: 25px;
+		  /*  color: #00FF00; */
+			color: #000000;
+		}
+		.Caption
+		{
+			font-size: .9em;
+			font-style: italic;
+			margin: 0;
+			padding: 4px;
+		}
+		
+	</style>
+   
+	<HTA:APPLICATION ID="oHTA" 
+		 APPLICATIONNAME="Computer Ping 2" 
+		 BORDER="Normal" 
+		 BORDERSTYLE="normal" 
+		 CAPTION="YES" 
+		 ICON="" 
+		 MAXIMIZEBUTTON="yes" 
+		 MINIMIZEBUTTON="yes" 
+		 SHOWINTASKBAR="yes" 
+		 SINGLEINSTANCE="yes" 
+		 SYSMENU="yes" 
+		 SCROLL="no" 
+		 VERSION="1.0" 
+		 WINDOWSTATE="maximize"/> 
+
+<script language="vbscript" type="text/vbscript">
+'* created by Brett Bensley, 2016. credit to various sources on the internet.
+timerVal = 60000
+Sub Window_OnLoad 
+'* sets up the display window
+		window.resizeTo 1024,768
+		'Application.DisplayFullScreen = True ----- use this to make the window full screen.
+'* sets the interval for the repeat of the Refreshlist subrountine
+			
+			iTimerID = window.setInterval("Refreshlist", timerVal) ' should be 60000 for 1 minute
+End Sub 
+'* tried to find a way to get the list of computers from active directory, but it failed
+'* this is the list of computers to ping  the & and _ allow it continue to a new line for readability
+'* put in the name of the computers you are wanting to ping.
+strComputers = "ComputerName1," _
+ & "ComputerName2," _
+ & "ComputerName3"
+ 
+arrComputers = SPLIT(strComputers, ",")
+'* increase the 150 to increase the number of computers, but remember to add cells to your table
+'* or decrease as needed, but watch your table you may have to adjust it.
+Dim arrFComputers(150)
+Dim arrCComp(150,2)
+DIM i
+flipVal=0
+compcount=0
+FOR EACH strComputer in arrComputers
+	arrCComp(compcount,0)= strComputer
+	arrCComp(compcount,1) = 0 
+	compcount = compcount + 1
+NEXT	
+count = 0
+Flip = 0
+FOR EACH strComputer in arrComputers
+'* the following does the ping and puts those that fail into a separate array
+	SET objPing = GETOBJECT("winmgmts:{impersonationLevel=impersonate}")._
+        		ExecQuery("select * from Win32_PingStatus where address = '" & _
+            		strComputer & "'")
+	FOR EACH objPingStatus in objPing
+        	IF ISNULL(objPingStatus.StatusCode) OR objPingStatus.StatusCode<>0 THEN 
+			IF strFailedPings <> "" THEN strFailedPings = strFailedPings & vbcrlf
+			strFailedPings = strFailedPings & strComputer
+			arrFComputers(count) = strComputer
+			For i = 0 To UBound(arrCComp, 1)
+				If strComputer = arrCComp(i,0) Then
+					arrCComp(i,1) = arrCComp(i,1) + 1
+				Exit For
+				End If
+			Next
+			END IF
+			NEXT
+		count = count + 1	
+	NEXT
+'* yes, I know I could have called this sub routine above and avoided the re-coding.  
+sub Refreshlist
+for x=0 to 150
+	arrFComputers(x) = ""
+next
+count = 0
+i = 0
+FOR EACH strComputer in arrComputers
+
+	SET objPing = GETOBJECT("winmgmts:{impersonationLevel=impersonate}")._
+        		ExecQuery("select * from Win32_PingStatus where address = '" & _
+            		strComputer & "'")
+	FOR EACH objPingStatus in objPing
+        	IF ISNULL(objPingStatus.StatusCode) OR objPingStatus.StatusCode<>0 THEN 
+			IF strFailedPings <> "" THEN strFailedPings = strFailedPings & vbcrlf
+			strFailedPings = strFailedPings & strComputer
+			arrFComputers(count) = strComputer
+			For i = 0 To UBound(arrCComp, 1)
+				If strComputer = arrCComp(i,0) Then
+					arrCComp(i,1) = arrCComp(i,1) + 1
+				Exit For
+				End If
+			Next
+        	END IF
+    	NEXT
+		count = count + 1	
+	NEXT
+'* the following calls the function that sets up the values for the table below
+Numbercells()
+end sub
+
+Sub ExitProgram
+        window.close()
+End Sub
+'* the function to setup the values in the table and change color as needed
+'* red for no ping and black for ping	
+Function Numbercells()
+'* this just sets up the single table colors to indicate that the programming is running
+'* green B to red B and back
+Set idTable =Document.Getelementbyid("iTable")
+Set idCells = idTable.Rows.Item(0).Cells
+if Flip = 0 then
+	idCells.Item(0).InnerHTML = "<font color=green>" + Cstr((timerVal/1000)) + " sec</font>"
+	Flip = 1
+else
+	idCells.Item(0).InnerHTML = "<font color=red>" + Cstr((timerVal/1000)) + " sec</font>"
+	Flip = 0
+end if	
+Count = 0
+arrCount = uBound(arrComputers) + 1
+Set objTable = Document.Getelementbyid("oTable")
+Rowslength = objTable.Rows.Length
+
+    For i=0 To Rowslength-1
+    
+        Set oCells = oTable.Rows.Item(i).Cells
+        Cellslength = oCells.Length
+        
+        For j=0 To Cellslength-1
+			if arrCount >0 then
+			For k = 0 To 150
+				If arrComputers(Count) = arrCComp(k,0) Then
+					flipVal = arrCComp(k,1)
+					if flipVal > 0 then
+						flipColor = "Orange"
+					else
+						flipColor = "black"
+					end if	
+				Exit For
+				End If
+			Next
+				If Ubound(Filter(arrFComputers, arrComputers(Count))) > -1 Then
+					fcolor = "red"
+				Else
+					fcolor = "black"
+				End If
+				 oCells.Item(j).InnerHTML = "<font color=" + fcolor + ">" + arrComputers(Count) + "</font>" + "<font color=" + flipColor + "> *" + Cstr(flipVal) + "</font>"
+				arrCount = arrCount - 1
+			else 
+				oCells.Item(j).InnerHTML = ""
+			end if			
+		Count = Count + 1
+        Next
+    Next
+
+End Function
+</script>
+<BODY onload="Numbercells()">
+<TABLE id=oTable border=1>
+<TR><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD></TR>
+<TR><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD></TR>
+<TR><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD></TR>
+<TR><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD></TR>
+<TR><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD></TR>
+<TR><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD></TR>
+<TR><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD></TR>
+<TR><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD></TR>
+<TR><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD></TR>
+<TR><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD></TR>
+<TR><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD></TR>
+
+</TABLE>
+<br></br>
+ <input id=runbutton type="button" value="Exit" onClick="ExitProgram">
+<br></br>
+<TABLE id=iTable border=1>
+<TR><TD>B</TD></TR>
+</TABLE>
+ </head>
+</body>
+</html>
