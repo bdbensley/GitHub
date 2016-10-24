@@ -1,0 +1,10 @@
+c:\users\brettb\documents\visual studio 2013\Projects\screenDup\screenDup\bin\Debug\screenDup.exe
+C:\Users\brettb\documents\visual studio 2013\Projects\screenDup\screenDup\bin\Debug\screenDup.exe.config
+C:\Users\brettb\documents\visual studio 2013\Projects\screenDup\screenDup\obj\Debug\screenDup.Form1.resources
+C:\Users\brettb\documents\visual studio 2013\Projects\screenDup\screenDup\obj\Debug\screenDup.Resources.resources
+C:\Users\brettb\documents\visual studio 2013\Projects\screenDup\screenDup\obj\Debug\screenDup.vbproj.GenerateResource.Cache
+C:\Users\brettb\documents\visual studio 2013\Projects\screenDup\screenDup\obj\Debug\screenDup.exe
+C:\Users\brettb\documents\visual studio 2013\Projects\screenDup\screenDup\obj\Debug\screenDup.xml
+C:\Users\brettb\documents\visual studio 2013\Projects\screenDup\screenDup\obj\Debug\screenDup.pdb
+C:\Users\brettb\documents\visual studio 2013\Projects\screenDup\screenDup\bin\Debug\screenDup.pdb
+C:\Users\brettb\documents\visual studio 2013\Projects\screenDup\screenDup\bin\Debug\screenDup.xml
